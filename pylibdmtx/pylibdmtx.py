@@ -42,7 +42,7 @@ Rect = namedtuple('Rect', 'left top width height')
 Point = namedtuple('Point', 'x y')
 
 # Results of reading a barcode
-Decoded = namedtuple('Decoded', 'data rect', 'corners)
+Decoded = namedtuple('Decoded', 'data rect corners')
 
 # Results of encoding data to an image
 Encoded = namedtuple('Encoded', 'width height bpp pixels')
@@ -175,7 +175,7 @@ def _decode_region(decoder, region, corrections, shrink):
             left = min([pt.x for pt in corners])
             right = max([pt.x for pt in corners])
             top = min([pt.y for pt in corners])
-            bottom = min([pt.y for pt in corners])
+            bottom = max([pt.y for pt in corners])
 
             return Decoded(
                 string_at(msg.contents.output, msg.contents.outputIdx),
