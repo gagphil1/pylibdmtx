@@ -243,15 +243,15 @@ def decode(image, timeout=None, gap_size=None, shrink=1, shape=None,
 
     Args:
         image: `numpy.ndarray`, `PIL.Image` or tuple (pixels, width, height)
-        timeout (int): milliseconds
-        gap_size (int):
-        shrink (int):
-        shape (int):
-        deviation (int):
-        threshold (int):
-        min_edge (int):
-        max_edge (int):
-        corrections (int):
+        timeout (int): stop scan after N milliseconds
+        gap_size (int): use scan grid with gap of N pixels between lines
+        shrink (int): internally shrink image by a factor of N
+        shape (int): only consider barcodes of specific size or shape
+        deviation (int): allow non-squareness of corners in degrees (0-90)
+        threshold (int): ignore weak edges below threshold N (1-100)
+        min_edge (int): pixel length of smallest expected edge in image
+        max_edge (int): pixel length of largest expected edge in image
+        corrections (int): correct at most N errors (0 = correction disabled)
         max_count (int): stop after reading this many barcodes. `None` to read
             as many as possible.
 
