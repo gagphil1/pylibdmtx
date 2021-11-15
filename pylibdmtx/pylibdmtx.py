@@ -170,7 +170,7 @@ def _decode_region(decoder, region, corrections, shrink):
             x1 = int((shrink * p11.X) + 0.5)
             y1 = int((shrink * p11.Y) + 0.5)
             return Decoded(
-                string_at(msg.contents.output),
+                string_at(msg.contents.output, msg.contents.outputIdx),
                 Rect(x0, y0, x1 - x0, y1 - y0)
             )
         else:
@@ -229,7 +229,7 @@ def _pixel_data(image):
 
 def decode(image, timeout=None, gap_size=None, shrink=1, shape=None,
            deviation=None, threshold=None, min_edge=None, max_edge=None,
-           corrections=None, max_count=None):
+           corrections=None, max_count=None, fnc1=None):
     """Decodes datamatrix barcodes in `image`.
 
     Args:
@@ -270,7 +270,8 @@ def decode(image, timeout=None, gap_size=None, shrink=1, shape=None,
                 (DmtxProperty.DmtxPropSquareDevn, deviation),
                 (DmtxProperty.DmtxPropEdgeThresh, threshold),
                 (DmtxProperty.DmtxPropEdgeMin, min_edge),
-                (DmtxProperty.DmtxPropEdgeMax, max_edge)
+                (DmtxProperty.DmtxPropEdgeMax, max_edge),
+                (DmtxProperty.DmtxPropFnc1, fnc1)                
             ]
 
             # Set only those properties with a non-None value
@@ -313,7 +314,7 @@ def _encoder():
         dmtxEncodeDestroy(byref(encoder))
 
 
-def encode(data, scheme=None, size=None):
+def encode(data, scheme=None, size=None, module_size=None):
     """
     Encodes `data` in a DataMatrix image.
 
@@ -325,6 +326,8 @@ def encode(data, scheme=None, size=None):
             If `None`, defaults to 'Ascii'.
         size: image dimensions - one of `ENCODING_SIZE_NAMES`, or `None`.
             If `None`, defaults to 'ShapeAuto'.
+        module_size: Module size in pixels, or `None`.
+            If `None`, defaults to 5
 
     Returns:
         Encoded: with properties `(width, height, bpp, pixels)`.
@@ -356,9 +359,12 @@ def encode(data, scheme=None, size=None):
         )
     scheme = getattr(DmtxScheme, scheme_name)
 
+    module_size = module_size if module_size else 5
+
     with _encoder() as encoder:
         dmtxEncodeSetProp(encoder, DmtxProperty.DmtxPropScheme, scheme)
         dmtxEncodeSetProp(encoder, DmtxProperty.DmtxPropSizeRequest, size)
+        dmtxEncodeSetProp(encoder, DmtxProperty.DmtxPropModuleSize, module_size)
 
         if dmtxEncodeDataMatrix(encoder, len(data), cast(data, c_ubyte_p)) == 0:
             raise PyLibDMTXError(
