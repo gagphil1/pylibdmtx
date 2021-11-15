@@ -38,8 +38,11 @@ ENCODING_SIZE_NAMES = [
 # A rectangle
 Rect = namedtuple('Rect', 'left top width height')
 
+# A point
+Point = namedtuple('Point', 'x y')
+
 # Results of reading a barcode
-Decoded = namedtuple('Decoded', 'data rect')
+Decoded = namedtuple('Decoded', 'data rect', 'corners)
 
 # Results of encoding data to an image
 Encoded = namedtuple('Encoded', 'width height bpp pixels')
@@ -157,21 +160,27 @@ def _decode_region(decoder, region, corrections, shrink):
     """
     with _decoded_matrix_region(decoder, region, corrections) as msg:
         if msg:
-            # Coordinates
-            p00 = DmtxVector2()
-            p11 = DmtxVector2(1.0, 1.0)
-            dmtxMatrix3VMultiplyBy(
-                p00,
-                region.contents.fit2raw
-            )
-            dmtxMatrix3VMultiplyBy(p11, region.contents.fit2raw)
-            x0 = int((shrink * p00.X) + 0.5)
-            y0 = int((shrink * p00.Y) + 0.5)
-            x1 = int((shrink * p11.X) + 0.5)
-            y1 = int((shrink * p11.Y) + 0.5)
+            def extract_corners(dec, reg):
+                height = dec.contents.image.contents.height
+                points = [
+                    DmtxVector2(0.0, 0.0), DmtxVector2(0.0, 1.0),
+                    DmtxVector2(1.0, 0.0), DmtxVector2(1.0, 1.0)
+                ]
+
+                for p in points:
+                    dmtxMatrix3VMultiplyBy(p, region.contents.fit2raw)
+                    yield Point(int((shrink * p.X) + 0.5), int((shrink * (height - p.Y - 1)) + 0.5))
+
+            corners = list(extract_corners(decoder, region))
+            left = min([pt.x for pt in corners])
+            right = max([pt.x for pt in corners])
+            top = min([pt.y for pt in corners])
+            bottom = min([pt.y for pt in corners])
+
             return Decoded(
                 string_at(msg.contents.output, msg.contents.outputIdx),
-                Rect(x0, y0, x1 - x0, y1 - y0)
+                Rect(left, top, right - left, bottom - top),
+                corners
             )
         else:
             return None
