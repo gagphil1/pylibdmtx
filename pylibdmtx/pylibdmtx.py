@@ -163,13 +163,15 @@ def _decode_region(decoder, region, corrections, shrink):
             def extract_corners(dec, reg):
                 height = dec.contents.image.contents.height
                 points = [
-                    DmtxVector2(0.0, 0.0), DmtxVector2(0.0, 1.0),
-                    DmtxVector2(1.0, 0.0), DmtxVector2(1.0, 1.0)
+                    DmtxVector2(0.0, 0.0),
+                    DmtxVector2(0.0, 1.0),
+                    DmtxVector2(1.0, 1.0),
+                    DmtxVector2(1.0, 0.0) 
                 ]
 
                 for p in points:
                     dmtxMatrix3VMultiplyBy(p, region.contents.fit2raw)
-                    yield Point(int((shrink * p.X) + 0.5), int((shrink * (height - p.Y - 1)) + 0.5))
+                    yield Point(int(shrink*p.X + 0.5), int(height - shrink*p.Y - 1 + 0.5))
 
             corners = list(extract_corners(decoder, region))
             left = min([pt.x for pt in corners])
@@ -246,17 +248,28 @@ def decode(image, timeout=None, gap_size=None, shrink=1, shape=None,
         timeout (int): stop scan after N milliseconds
         gap_size (int): use scan grid with gap of N pixels between lines
         shrink (int): internally shrink image by a factor of N
-        shape (int): only consider barcodes of specific size or shape
+        shape (int): only consider barcodes of specific size or shape. 
+            DmtxSymbolSize gives the legal values:
+               -3: RectAuto, -2: SquareAuto, -1: ShapeAuto
+                0: 10x10,    1: 12x12,    2: 14x14,    3: 16x16,    4: 18x18,
+                5: 20x20,    6: 22x22,    7: 24x24,    8: 26x26,    9: 32x32,
+               10: 36x36,   11: 40x40,   12: 44x44,   13: 48x48,   14: 52x52,
+               15: 64x64,   16: 72x72,   17: 80x80,   18: 88x88,   19: 96x96,
+               20: 104x104, 21: 120x120, 22: 132x132, 23: 144x144, 24: 8x18,
+               25: 8x32,    26: 12x26,   27: 12x36,   28: 16x36,   29: 16x48
         deviation (int): allow non-squareness of corners in degrees (0-90)
         threshold (int): ignore weak edges below threshold N (1-100)
         min_edge (int): pixel length of smallest expected edge in image
         max_edge (int): pixel length of largest expected edge in image
         corrections (int): correct at most N errors (0 = correction disabled)
         max_count (int): stop after reading this many barcodes. `None` to read
-            as many as possible.
+            as many as possible
+        fnc1 (int): enable GS1 mode and define character to represent FNC1. 
 
     Returns:
         :obj:`list` of :obj:`Decoded`: The values decoded from barcodes.
+
+
     """
     dmtx_timeout = None
     if timeout:
