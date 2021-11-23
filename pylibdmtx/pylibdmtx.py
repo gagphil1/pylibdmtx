@@ -181,7 +181,7 @@ def _decode_region(decoder, region, corrections, shrink):
 
             return Decoded(
                 string_at(msg.contents.output, msg.contents.outputIdx),
-                Rect(left, top, right - left, bottom - top),
+                Rect(left, top, right - left + 1, bottom - top + 1),
                 corners
             )
         else:

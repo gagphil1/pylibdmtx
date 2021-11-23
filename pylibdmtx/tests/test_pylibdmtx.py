@@ -35,13 +35,13 @@ class TestDecode(unittest.TestCase):
     EXPECTED = [
         Decoded(
             data=b'Stegosaurus',
-            rect=Rect(left=5, top=6, width=96, height=95),
-            corners=[Point(x=5, y=101), Point(x=5, y=6), Point(x=101, y=101), Point(x=101, y=6)]
+            rect=Rect(left=5, top=6, width=97, height=96),
+            corners=[Point(x=5, y=101), Point(x=5, y=6), Point(x=101, y=6), Point(x=101, y=101)]
         ),
         Decoded(
             data=b'Plesiosaurus',
-            rect=Rect(left=298, top=6, width=95, height=95),
-            corners=[Point(x=298, y=101), Point(x=298, y=6), Point(x=393, y=101), Point(x=393, y=6)]
+            rect=Rect(left=298, top=6, width=96, height=96),
+            corners=[Point(x=298, y=101), Point(x=298, y=6), Point(x=393, y=6), Point(x=393, y=101)]
         )
     ]
 
